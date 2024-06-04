@@ -103,7 +103,7 @@ async def is_birhday():
 # Фоновая задача, проверяющая is_birhday каждый день
 async def start_scheduler():
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(is_birhday, 'interval', seconds=1)
+    scheduler.add_job(is_birhday, 'cron', hour=10, minute=00)
     scheduler.start()
 
 if __name__=="__main__":
