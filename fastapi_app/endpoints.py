@@ -16,7 +16,7 @@ from db.orm import (get_db, get_users_no_subs,add_user,get_user_from_db,
                     subscribe,unsubscribe, get_subscription_list, get_subscribers,
                     update_name, update_birthday)
 
-from bot.main import bot
+from bot.main import bot,start_bot
 from config import TUNA_URL
 
 
@@ -127,12 +127,14 @@ async def start_scheduler():
                       start_date='2000-01-01 00:00:00')
     scheduler.start()
 
-async def main():
+# async def main():
+async def start_api():
     asyncio.create_task(start_scheduler())
 
     config = uvicorn.Config("endpoints:app", host="0.0.0.0", port=8080, reload=True)
     server = uvicorn.Server(config)
     await server.serve()
 
+
 if __name__ == "__main__":
-    asyncio.run(main())
+     asyncio.run(start_api())

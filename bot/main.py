@@ -18,7 +18,6 @@ async def start_bot():
     await dp.start_polling(bot)
 
 if __name__=='__main__':
-#def start_tg_bot():
     try:
         asyncio.run(start_bot())
     except KeyboardInterrupt:

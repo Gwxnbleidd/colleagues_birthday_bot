@@ -1,18 +1,16 @@
 import asyncio
-from aiogram import Bot,Dispatcher,F
+import os
+import sys
+sys.path.append(f'{os.getcwd()}')
+sys.path.append(f'{os.getcwd()}/db')
+sys.path.append(f'{os.getcwd()}/bot')
+sys.path.append(f'{os.getcwd()}/fastapi_app')
 
-from config import BOT_TOKEN,TUNA_URL
-from handlers import router
-
-bot = Bot(token=BOT_TOKEN)
-dp = Dispatcher()
-dp.include_router(router)
-
-async def main():
-    await dp.start_polling(bot)
+import subprocess
+from fastapi_app.endpoints import start_api
 
 if __name__=='__main__':
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print('Бот завершил работу.')
+
+    subprocess.Popen(args=['python3', 'fastapi_app/endpoints.py'])
+    subprocess.Popen(args=['python3', 'bot/main.py'])
+
