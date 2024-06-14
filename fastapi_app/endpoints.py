@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException,status
+import requests
 import uvicorn
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import datetime
@@ -16,20 +17,20 @@ from db.orm import (get_db, get_users_no_subs,add_user,get_user_from_db,
                     subscribe,unsubscribe, get_subscription_list, get_subscribers,
                     update_name, update_birthday)
 
-from bot.main import bot,start_bot
-from config import TUNA_URL
+from bot.main import bot
+from config import TUNA_URL, BOT_TOKEN
 
 
 app = FastAPI()
 
-# Пока без куки
+
 @app.post('/login')
 async def login(user_id: int, user_password: str):
     usr = get_user_from_db(user_id)
     if usr != None:
         user = User(id=usr.id, name = usr.name, password=usr.password, birthday=usr.birthday)
         if user.password == user_password:
-            return {'message':'authorization was successful'}
+            return {'OK'}
         else:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Incorrect password')
     else:
@@ -43,9 +44,10 @@ async def get_all_users():
         res.append(User(id=user[0], name=user[1], birthday=user[2], password=user[3]).name)
     return res
 
-# Взять список пользоваьелей, на которых id не подписан
+# Взять список пользователей, на которых id не подписан
 @app.get('/users_no_subs')
 async def get_users_no_subs_func(id: int):
+    print(id)
     res = []
     for user in get_users_no_subs(id):
         res.append([user[0], user[1]])
@@ -105,7 +107,6 @@ async def set_new_name(user_id: int, new_birthday: datetime.date):
     update_birthday(user_id, new_birthday)
     return {'message': 'successful'}
 
-
 # Проверка наличия сегодня ДР сотрудников
 @app.get('/is_birthday')
 async def is_birhday():
@@ -116,9 +117,9 @@ async def is_birhday():
     for user in db:
         if user.birthday.day == today.day and user.birthday.month == today.month:
             subscribers_id = get_subscribers(user.id)
-            # Оповестить если нет др сегодня
             for subs_id in subscribers_id:
                 await bot.send_message(chat_id=subs_id, text=f'У коллеги {user.name} сегодня День Рождения!')
+                
 
 # Фоновая задача, проверяющая is_birhday каждый день
 async def start_scheduler():
