@@ -1,5 +1,6 @@
 import asyncio
 import os
+import signal
 import sys
 sys.path.append(f'{os.getcwd()}')
 sys.path.append(f'{os.getcwd()}/db')
@@ -7,10 +8,17 @@ sys.path.append(f'{os.getcwd()}/bot')
 sys.path.append(f'{os.getcwd()}/fastapi_app')
 
 import subprocess
-from fastapi_app.endpoints import start_api
 
 if __name__=='__main__':
 
-    subprocess.Popen(args=['python3', 'fastapi_app/endpoints.py'])
-    subprocess.Popen(args=['python3', 'bot/main.py'])
+    pid_fastapi_proc = subprocess.Popen(args=['python3', 'fastapi_app/endpoints.py']).pid
+    pid_bot_proc = subprocess.Popen(args=['python3', 'bot/main.py']).pid
+
+    
+    # Запустить эти процессы из одного файла иначе не получается.
+    # Чтобы остановить программу, нужно завершить эти процессы вручную
+    q = input('Введите "q" для остановки бота')
+    if q=='Q' or q=='q':
+        os.kill(pid_bot_proc, signal.SIGTERM)
+        os.kill(pid_fastapi_proc, signal.SIGTERM)
 
