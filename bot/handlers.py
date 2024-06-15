@@ -88,8 +88,7 @@ async def get_password_registration(message: Message, state: FSMContext):
         await message.answer('Авторизация прошла успешно!\nЧто мне нужно сделать?',reply_markup=kb.menu)
         await state.clear()
     elif responce.status_code == 401:
-        await message.answer('Неверный пароль!\nВведите команду /start .\nЕсли вы забыли пароль, обратитесь к администратору.')
-        await state.clear()
+        await message.answer('Неверный пароль!\nПопробуй еще раз .\nЕсли вы забыли пароль, обратитесь к администратору.')
     else:
         await message.answer('Ошибка авторизации!\nВведите команду /start .')
         await state.clear()
@@ -100,7 +99,7 @@ async def get_list_of_all_employees(message: Message):
     if responce.status_code == 200:
         users = responce.json()
         user_list = '\n\n'.join(users)
-        await message.answer(f'Список всех коллег:\n\n{user_list}')
+        await message.answer(f'Список всех коллег:\n\n{user_list}', reply_markup=kb.menu)
     else:
         await message.answer('Ошибка получения списка коллег')
 
@@ -109,6 +108,8 @@ async def subscribe_to_employee(message: Message):
     responce = requests.get(f'{TUNA_URL}/users_no_subs?id={message.from_user.id}')
     if responce.status_code == 200:
         users = responce.json()
+        if not users:
+            return await message.answer('Вы подписались на всех коллег!')
         buttons = kb.form_users_list(users)
         await message.answer(f'Выберите на кого подписаться:', reply_markup= buttons)
     else:
@@ -121,11 +122,11 @@ async def process_callback(callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     responce = requests.post(url=f'{TUNA_URL}/add_subscription?user_id={user_id}&subs_id={chosen_user_id}')
     if responce.status_code == 200:
-        await callback_query.message.answer('Вы успешно подписались на коллегу!')
+        await callback_query.message.answer('Вы успешно подписались на коллегу!', reply_markup=kb.menu)
     elif responce.status_code == 409:
-        await callback_query.message.answer('Вы уже подписаны на этого коллегу')
+        await callback_query.message.answer('Вы уже подписаны на этого коллегу', reply_markup=kb.menu)
     else:
-        await callback_query.message.answer('Ошибка!')
+        await callback_query.message.answer('Ошибка!', reply_markup=kb.menu)
     
 
 @router.message(F.text == 'Отписаться от коллеги')
@@ -147,11 +148,11 @@ async def process_callback(callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     responce = requests.post(url=f'{TUNA_URL}/unsubscribe?user_id={user_id}&subs_id={chosen_user_id}')
     if responce.status_code == 200:
-        await callback_query.message.answer('Вы успешно отписались от коллеги!')
+        await callback_query.message.answer('Вы успешно отписались от коллеги!', reply_markup=kb.menu)
     elif responce.status_code == 409:
-        await callback_query.message.answer('Вы и так не подписаны на этого коллегу')    
+        await callback_query.message.answer('Вы и так не подписаны на этого коллегу', reply_markup=kb.menu)    
     else:
-        await callback_query.message.answer('Ошибка!')
+        await callback_query.message.answer('Ошибка!', reply_markup=kb.menu)
 
 @router.message(F.text == 'Посмотреть список подписок')
 async def get_subscription_list_cmd(message:Message):
