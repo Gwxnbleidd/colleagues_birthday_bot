@@ -1,5 +1,4 @@
 from fastapi import FastAPI, HTTPException,status
-import requests
 import uvicorn
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import datetime
@@ -47,7 +46,6 @@ async def get_all_users():
 # Взять список пользователей, на которых id не подписан
 @app.get('/users_no_subs')
 async def get_users_no_subs_func(id: int):
-    print(id)
     res = []
     for user in get_users_no_subs(id):
         res.append([user[0], user[1]])
@@ -93,7 +91,6 @@ async def get_unsubscribe(user_id: int, subs_id: int):
 async def get_subscription(id: int):
     res = []
     for user in get_subscription_list(id):
-        print(f'{user=}')
         res.append((user[0], user[1]))
     return res
 
